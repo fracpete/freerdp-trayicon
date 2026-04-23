@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=FreeRDP Tray Icon
+Exec=freerdp-tray
+Icon=freerdp-tray
+Categories=GTK;GNOME;Network;
+Terminal=false
