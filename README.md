@@ -1,9 +1,18 @@
 # freerdp-trayicon
-Python library that adds a tray icon for easily launching [freerdp](https://github.com/FreeRDP/FreeRDP) connections.
+Python library that adds a tray icon for easily launching [freerdp](https://github.com/FreeRDP/FreeRDP) 
+connections via `xfreerdp`.
 
 You can start the tray icon with `freerdp-tray`.
 
 ## Installation
+
+### Install xfreerdp
+
+If not already present on your system:
+
+```bash
+sudo apt install freerdp2-x11
+```
 
 ### Prerequisites
 
