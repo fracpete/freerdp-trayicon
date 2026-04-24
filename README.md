@@ -82,7 +82,7 @@ Examples:
 
 ```json
 {
-  "options": "/u:USER /w:1280 /h:960 /v:HOST /g:GATEWAY",
+  "options": "/u:USER /w:1280 /h:960 /dynamic-resolution /v:HOST /g:GATEWAY",
   "promptPassword": true,
   "sshTunnel": false
 }
@@ -92,7 +92,7 @@ Examples:
 
 ```json
 {
-  "options": "/w:1280 /h:960 /v:HOST",
+  "options": "/w:1280 /h:960 /dynamic-resolution /v:HOST",
   "promptPassword": false,
   "sshTunnel": true
 }
