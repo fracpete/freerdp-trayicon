@@ -39,3 +39,52 @@ pip install git+https://github.com/fracpete/freerdp-trayicon.git
 
 Or, when running Debian/Ubuntu, download and install the Debian package from the 
 [Releases section](https://github.com/fracpete/freerdp-trayicon/releases).
+
+
+## Config files
+
+**NB:** The user gets directed through prompts when selecting *Create...*
+from the tray-icon menu. You don't have to create these files yourself.
+
+The config files of the connections get stored in the following location:
+
+```bash
+$HOME/.config/freerdp-trayicon
+```
+
+The file format is JSON and supports the following parameters:
+
+```
+{
+  "options": "XFREERDP OPTIONS", 
+  "promptPassword": BOOLEAN,
+  "sshTunnel": BOOL
+}
+```
+
+* `options`: the options for xfreerdp
+* `promptPassword`: whether to prompt the user for a password and add it to the options as `/p:PASSWORD`
+* `sshTunnel`: whether to connect through a local ssh tunnel
+
+Examples:
+
+* connect as user `USER` to remote host `HOST` via the gateway `GATEWAY`, 
+  get prompted for a password but don't use an ssh tunnel:
+
+```json
+{
+  "options": "/u:USER /w:1280 /h:960 /v:HOST /g:GATEWAY",
+  "promptPassword": true,
+  "sshTunnel": false
+}
+```
+
+* connect to remote host `HOST` using an ssh tunnel:
+
+```json
+{
+  "options": "/w:1280 /h:960 /v:HOST",
+  "promptPassword": false,
+  "sshTunnel": true
+}
+```

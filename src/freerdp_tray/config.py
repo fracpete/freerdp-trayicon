@@ -1,5 +1,9 @@
 import json
 import os
+import shlex
+import socket
+import subprocess
+import threading
 import traceback
 from collections import OrderedDict
 from typing import List, Dict, Any, Optional
@@ -14,6 +18,7 @@ APPLICATION_NAME = "freerdp-trayicon"
 
 KEY_TERMINAL = "terminal"
 KEY_PROMPT_PASSWORD = "promptPassword"
+KEY_SSH_TUNNEL = "sshTunnel"
 KEY_OPTIONS = "options"
 
 XFREERDP = "xfreerdp"
@@ -198,3 +203,116 @@ def save_connection(connection: str, options: Dict[str, Any]) -> bool:
         traceback.print_exc()
 
     return False
+
+
+def get_next_port() -> Optional[int]:
+    """
+    Determines a free port to use for ssh tunneling.
+
+    Taken from here:
+    https://superuser.com/a/1671326
+
+    :return: the port, None if failed to determine
+    :rtype: int
+    """
+    try:
+        s = socket.socket()
+        s.bind(('', 0))
+        result = s.getsockname()[1]
+        s.close()
+        return result
+    except:
+        print("Failed to determine free port!")
+        traceback.print_exc()
+        return None
+
+
+def extract_host(options: str) -> Optional[str]:
+    """
+    Extracts the host from the freerdp options.
+
+    :param options: the options to parse
+    :type options: str
+    :return: the host, None if not found
+    :rtype: str
+    """
+    parts = shlex.split(options)
+    for part in parts:
+        if part.startswith("/v:"):
+            return part[3:]
+
+    print("Failed to extract host from: %s" % options)
+    return None
+
+
+def replace_host(options: str, new_host: str) -> str:
+    """
+    Replaces the host (/v:...) in the freerdp options with the new one.
+
+    :param options: the options to update
+    :type options: str
+    :param new_host: the new host to use (incl port)
+    :type new_host: str
+    :return: the updated options
+    :rtype: str
+    """
+    parts = shlex.split(options)
+    for i, part in enumerate(parts):
+        if part.startswith("/v:"):
+            parts[i] = "/v:" + new_host
+            return shlex.join(parts)
+
+    print("Failed to replace host in: %s" % options)
+    return options
+
+
+def open_connection(connection: str, params: Dict[str, Any], password: str = None):
+    """
+    Builds the command using the specified parameters and performs a remote connect.
+
+    :param connection: the name of the connection
+    :type connection: str
+    :param params: the parameters for the connection
+    :type params: dict
+    :param password: the password to use, ignored if None
+    :type password: str
+    """
+    print("Connecting: %s" % connection)
+
+    options = params[KEY_OPTIONS]
+    if password is not None:
+        options += " /p:" + password
+
+    tunnel = None
+    if KEY_SSH_TUNNEL in params:
+        port = get_next_port()
+        if port is None:
+            print("No port determine, cannot launch ssh tunnel!")
+            return
+        host = extract_host(options)
+        options = replace_host(options, "localhost:%d" % port)
+        tunnel = "ssh -f -L " + str(port) + ":localhost:3389 " + host + " sleep 1"
+
+    # TODO in terminal?
+
+    # launch
+    cmd = XFREERDP + " " + options
+    if tunnel is not None:
+        cmd = "bash -c '" + tunnel + "; " + cmd + "'"
+    thread = threading.Thread(target=run_command, args=(cmd,))
+    thread.start()
+
+
+def run_command(cmd: str):
+    """
+    Executes the specified command.
+
+    :param cmd: the command to execute
+    :type cmd: str
+    """
+    try:
+        args = shlex.split(cmd)
+        subprocess.run(args)
+    except:
+        print("Failed to execute: %s" % cmd)
+        traceback.print_exc()

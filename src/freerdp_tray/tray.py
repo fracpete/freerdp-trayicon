@@ -1,12 +1,10 @@
 import os
 import json
-import shlex
-import subprocess
-import threading
 import traceback
 import gi
 from freerdp_tray.config import THEMES, config_file, load_config, list_connections, remove_connection, \
-    load_connection, save_connection, KEY_OPTIONS, KEY_TERMINAL, KEY_PROMPT_PASSWORD, XFREERDP
+    load_connection, save_connection, open_connection, KEY_OPTIONS, KEY_TERMINAL, KEY_PROMPT_PASSWORD, KEY_SSH_TUNNEL, \
+    XFREERDP
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 gi.require_version('AppIndicator3', '0.1')
@@ -267,6 +265,15 @@ def create_connection(_):
     prompt_password = dialog.entry.get_text().lower() == "y"
     dialog.destroy()
 
+    # ssh tunnel?
+    dialog = InputDialog(None, "Use SSH tunnel (y/n)?")
+    response = dialog.run()
+    if response != Gtk.ResponseType.OK:
+        dialog.destroy()
+        return
+    ssh_tunnel = dialog.entry.get_text().lower() == "y"
+    dialog.destroy()
+
     # in terminal?
     # TODO enable
     in_terminal = False
@@ -283,6 +290,7 @@ def create_connection(_):
         KEY_OPTIONS: options,
         KEY_TERMINAL: in_terminal,
         KEY_PROMPT_PASSWORD: prompt_password,
+        KEY_SSH_TUNNEL: ssh_tunnel
     }
     ok = save_connection(connection, params)
     if not ok:
@@ -306,14 +314,14 @@ def launch_connection(e):
     """
 
     connection = e.get_label()
-    print("Connecting: %s" % connection)
+    print("Loading: %s" % connection)
     params = load_connection(connection)
     if params is None:
         print("Failed to load connection data for: %s" % connection)
 
     # password prompt?
     password = None
-    if KEY_PROMPT_PASSWORD in params:
+    if (KEY_PROMPT_PASSWORD in params) and params[KEY_PROMPT_PASSWORD]:
         dialog = PasswordDialog(None, "Please enter password:")
         response = dialog.run()
         if response != Gtk.ResponseType.OK:
@@ -322,31 +330,7 @@ def launch_connection(e):
         password = dialog.entry.get_text()
         dialog.destroy()
 
-    options = params[KEY_OPTIONS]
-    if params is not None:
-        options += " /p:" + password
-
-    # TODO in terminal?
-
-    # launch
-    cmd = XFREERDP + " " + options
-    thread = threading.Thread(target=run_command, args=(cmd,))
-    thread.start()
-
-
-def run_command(cmd: str):
-    """
-    Executes the specified command.
-
-    :param cmd: the command to execute
-    :type cmd: str
-    """
-    try:
-        args = shlex.split(cmd)
-        subprocess.run(args)
-    except:
-        print("Failed to execute: %s" % cmd)
-        traceback.print_exc()
+    open_connection(connection, params, password=password)
 
 
 def delete_connection(e):
