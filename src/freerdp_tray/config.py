@@ -352,5 +352,5 @@ def run_command(cmd: str):
             dialog.run()
             dialog.destroy()
     except:
-        print("Failed to execute: %s" % cmd)
+        print("Failed to execute: %s" % mask_password(cmd))
         traceback.print_exc()
