@@ -284,7 +284,7 @@ def open_connection(connection: str, params: Dict[str, Any], password: str = Non
 
     options = params[KEY_OPTIONS]
     if password is not None:
-        options += " /p:" + password
+        options += ' "/p:%s"' % password
 
     tunnel = None
     if KEY_SSH_TUNNEL in params:
