@@ -342,7 +342,21 @@ def run_command(cmd: str):
     try:
         args = shlex.split(cmd)
         res = subprocess.run(args)
-        if res.returncode != 0:
+        print("Exit code: %d", res.returncode)
+
+        # exit codes
+        # https://github.com/FreeRDP/FreeRDP/blob/f7dc5e0005afcdb7d6ef09c5e4daa40c5d5452dd/client/X11/xfreerdp.h#L338
+        show_error_msg = res.returncode != 0
+        if res.returncode == 1:  # XF_EXIT_SUCCESS
+            show_error_msg = False
+        elif res.returncode == 2:  # XF_EXIT_LOGOFF
+            show_error_msg = False
+        elif res.returncode == 11:  # XF_EXIT_DISCONNECT_BY_USER
+            show_error_msg = False
+        elif res.returncode == 12:  # ??? Windows sign out ???
+            show_error_msg = False
+
+        if show_error_msg:
             dialog = Gtk.MessageDialog(
                 flags=0,
                 message_type=Gtk.MessageType.ERROR,
