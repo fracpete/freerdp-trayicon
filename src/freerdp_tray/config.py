@@ -7,6 +7,9 @@ import threading
 import traceback
 from collections import OrderedDict
 from typing import List, Dict, Any, Optional
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 
 THEMES = OrderedDict({
@@ -312,7 +315,16 @@ def run_command(cmd: str):
     """
     try:
         args = shlex.split(cmd)
-        subprocess.run(args)
+        res = subprocess.run(args)
+        if res.returncode != 0:
+            dialog = Gtk.MessageDialog(
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Failed to run command (exit code %d):\n%s" % (res.returncode, cmd),
+            )
+            dialog.run()
+            dialog.destroy()
     except:
         print("Failed to execute: %s" % cmd)
         traceback.print_exc()
