@@ -306,6 +306,32 @@ def open_connection(connection: str, params: Dict[str, Any], password: str = Non
     thread.start()
 
 
+def mask_password(cmd: str) -> str:
+    """
+    Masks the password in the command.
+
+    :param cmd: the command to process
+    :type cmd: str
+    :return: the updated command
+    :rtype: str
+    """
+    result = cmd
+    if "/p:" in cmd:
+        mask = [False] * len(cmd)
+        for i in range(cmd.index("/p:")+3, len(cmd)):
+            s = cmd[i:i+1]
+            if s == " ":
+                break
+            mask[i] = True
+        result = ""
+        for i in range(len(cmd)):
+            if mask[i]:
+                result += "*"
+            else:
+                result += cmd[i:i+1]
+    return result
+
+
 def run_command(cmd: str):
     """
     Executes the specified command.
@@ -321,7 +347,7 @@ def run_command(cmd: str):
                 flags=0,
                 message_type=Gtk.MessageType.ERROR,
                 buttons=Gtk.ButtonsType.OK,
-                text="Failed to run command (exit code %d):\n%s" % (res.returncode, cmd),
+                text="Failed to run command (exit code %d):\n%s" % (res.returncode, mask_password(cmd)),
             )
             dialog.run()
             dialog.destroy()
