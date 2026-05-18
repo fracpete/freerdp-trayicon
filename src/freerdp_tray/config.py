@@ -74,7 +74,7 @@ XF_EXIT_CONNECT_LOGON_TYPE_NOT_GRANTED = 158
 XF_EXIT_CONNECT_NO_OR_MISSING_CREDENTIALS = 159
 XF_EXIT_CONNECT_TARGET_BOOTING = 160
 
-XR_EXIT_CODES = {
+XF_EXIT_CODES = {
     XF_EXIT_SUCCESS: "Success",
     XF_EXIT_DISCONNECT: "Disconnect",
     XF_EXIT_LOGOFF: "Logoff",
@@ -479,7 +479,7 @@ def run_command(cmd: str):
 
         if show_error_msg:
             if res.returncode in XF_EXIT_CODES:
-                msg = "exit code %d: %s" % (res.returncode, XR_EXIT_CODES[res.returncode])
+                msg = "exit code %d: %s" % (res.returncode, XF_EXIT_CODES[res.returncode])
             else:
                 msg = "exit code %d" % res.returncode
             dialog = Gtk.MessageDialog(
