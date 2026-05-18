@@ -11,6 +11,127 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
+# known xfreerdp error codes:
+# https://github.com/FreeRDP/FreeRDP/blob/f7dc5e0005afcdb7d6ef09c5e4daa40c5d5452dd/client/X11/xfreerdp.h#L338
+# section 0 - 15: protocol - independent codes
+XF_EXIT_SUCCESS = 0,
+XF_EXIT_DISCONNECT = 1,
+XF_EXIT_LOGOFF = 2,
+XF_EXIT_IDLE_TIMEOUT = 3,
+XF_EXIT_LOGON_TIMEOUT = 4,
+XF_EXIT_CONN_REPLACED = 5,
+XF_EXIT_OUT_OF_MEMORY = 6,
+XF_EXIT_CONN_DENIED = 7,
+XF_EXIT_CONN_DENIED_FIPS = 8,
+XF_EXIT_USER_PRIVILEGES = 9,
+XF_EXIT_FRESH_CREDENTIALS_REQUIRED = 10,
+XF_EXIT_DISCONNECT_BY_USER = 11,
+
+# section 16 - 31: license error set
+XF_EXIT_LICENSE_INTERNAL = 16,
+XF_EXIT_LICENSE_NO_LICENSE_SERVER = 17,
+XF_EXIT_LICENSE_NO_LICENSE = 18,
+XF_EXIT_LICENSE_BAD_CLIENT_MSG = 19,
+XF_EXIT_LICENSE_HWID_DOESNT_MATCH = 20,
+XF_EXIT_LICENSE_BAD_CLIENT = 21,
+XF_EXIT_LICENSE_CANT_FINISH_PROTOCOL = 22,
+XF_EXIT_LICENSE_CLIENT_ENDED_PROTOCOL = 23,
+XF_EXIT_LICENSE_BAD_CLIENT_ENCRYPTION = 24,
+XF_EXIT_LICENSE_CANT_UPGRADE = 25,
+XF_EXIT_LICENSE_NO_REMOTE_CONNECTIONS = 26,
+
+# section 128-254: xfreerdp specific exit codes
+XF_EXIT_PARSE_ARGUMENTS = 128
+XF_EXIT_MEMORY = 129
+XF_EXIT_PROTOCOL = 130
+XF_EXIT_CONN_FAILED = 131
+XF_EXIT_AUTH_FAILURE = 132
+XF_EXIT_NEGO_FAILURE = 133
+XF_EXIT_LOGON_FAILURE = 134
+XF_EXIT_ACCOUNT_LOCKED_OUT = 135
+XF_EXIT_PRE_CONNECT_FAILED = 136
+XF_EXIT_CONNECT_UNDEFINED = 137
+XF_EXIT_POST_CONNECT_FAILED = 138
+XF_EXIT_DNS_ERROR = 139
+XF_EXIT_DNS_NAME_NOT_FOUND = 140
+XF_EXIT_CONNECT_FAILED = 141
+XF_EXIT_MCS_CONNECT_INITIAL_ERROR = 142
+XF_EXIT_TLS_CONNECT_FAILED = 143
+XF_EXIT_INSUFFICIENT_PRIVILEGES = 144
+XF_EXIT_CONNECT_CANCELLED = 145
+XF_EXIT_CONNECT_TRANSPORT_FAILED = 147
+XF_EXIT_CONNECT_PASSWORD_EXPIRED = 148
+XF_EXIT_CONNECT_PASSWORD_MUST_CHANGE = 149
+XF_EXIT_CONNECT_KDC_UNREACHABLE = 150
+XF_EXIT_CONNECT_ACCOUNT_DISABLED = 151
+XF_EXIT_CONNECT_PASSWORD_CERTAINLY_EXPIRED = 152
+XF_EXIT_CONNECT_CLIENT_REVOKED = 153
+XF_EXIT_CONNECT_WRONG_PASSWORD = 154
+XF_EXIT_CONNECT_ACCESS_DENIED = 155
+XF_EXIT_CONNECT_ACCOUNT_RESTRICTION = 156
+XF_EXIT_CONNECT_ACCOUNT_EXPIRED = 157
+XF_EXIT_CONNECT_LOGON_TYPE_NOT_GRANTED = 158
+XF_EXIT_CONNECT_NO_OR_MISSING_CREDENTIALS = 159
+XF_EXIT_CONNECT_TARGET_BOOTING = 160
+
+XR_EXIT_CODES = {
+    XF_EXIT_SUCCESS: "Success",
+    XF_EXIT_DISCONNECT: "Disconnect",
+    XF_EXIT_LOGOFF: "Logoff",
+    XF_EXIT_IDLE_TIMEOUT: "Idle timeout",
+    XF_EXIT_LOGON_TIMEOUT: "Login timeout",
+    XF_EXIT_CONN_REPLACED: "Connection replaced",
+    XF_EXIT_OUT_OF_MEMORY: "Out of memory",
+    XF_EXIT_CONN_DENIED: "Connection denied",
+    XF_EXIT_CONN_DENIED_FIPS: "Connection denied FIPS",
+    XF_EXIT_USER_PRIVILEGES: "User privileges",
+    XF_EXIT_FRESH_CREDENTIALS_REQUIRED: "Fresh credentials required",
+    XF_EXIT_DISCONNECT_BY_USER: "Disconnect by user",
+    XF_EXIT_LICENSE_INTERNAL: "License: internal",
+    XF_EXIT_LICENSE_NO_LICENSE_SERVER: "License: no license server",
+    XF_EXIT_LICENSE_NO_LICENSE: "License: no license",
+    XF_EXIT_LICENSE_BAD_CLIENT_MSG: "License: bad client message",
+    XF_EXIT_LICENSE_HWID_DOESNT_MATCH: "License: hardware ID doesn't match",
+    XF_EXIT_LICENSE_BAD_CLIENT: "License: bad client",
+    XF_EXIT_LICENSE_CANT_FINISH_PROTOCOL: "License: can't finish protocol",
+    XF_EXIT_LICENSE_CLIENT_ENDED_PROTOCOL: "License: client ended protocol",
+    XF_EXIT_LICENSE_BAD_CLIENT_ENCRYPTION: "License: bad client encryption",
+    XF_EXIT_LICENSE_CANT_UPGRADE: "License: can't upgrade",
+    XF_EXIT_LICENSE_NO_REMOTE_CONNECTIONS: "License: no remote connections",
+    XF_EXIT_PARSE_ARGUMENTS: "Parse arguments",
+    XF_EXIT_MEMORY: "Memory",
+    XF_EXIT_PROTOCOL: "Protocol",
+    XF_EXIT_CONN_FAILED: "Connection failed",
+    XF_EXIT_AUTH_FAILURE: "Authentication failure",
+    XF_EXIT_NEGO_FAILURE: "Negotitation failure",
+    XF_EXIT_LOGON_FAILURE: "Logon failure",
+    XF_EXIT_ACCOUNT_LOCKED_OUT: "Account locked out",
+    XF_EXIT_PRE_CONNECT_FAILED: "Pre-connect failed",
+    XF_EXIT_CONNECT_UNDEFINED: "Connect undefined",
+    XF_EXIT_POST_CONNECT_FAILED: "Post-connect failed",
+    XF_EXIT_DNS_ERROR: "DNS error",
+    XF_EXIT_DNS_NAME_NOT_FOUND: "DNS name not found",
+    XF_EXIT_CONNECT_FAILED: "Connect: failed",
+    XF_EXIT_MCS_CONNECT_INITIAL_ERROR: "MCS connect: initial error",
+    XF_EXIT_TLS_CONNECT_FAILED: "TLS connect: failed",
+    XF_EXIT_INSUFFICIENT_PRIVILEGES: "Insufficient privileges",
+    XF_EXIT_CONNECT_CANCELLED: "Connect: cancelled",
+    XF_EXIT_CONNECT_TRANSPORT_FAILED: "Connect: transport failed",
+    XF_EXIT_CONNECT_PASSWORD_EXPIRED: "Connect: password expired",
+    XF_EXIT_CONNECT_PASSWORD_MUST_CHANGE: "Connect: password must change",
+    XF_EXIT_CONNECT_KDC_UNREACHABLE: "Connect: KDC unreachable",
+    XF_EXIT_CONNECT_ACCOUNT_DISABLED: "Connect: account disabled",
+    XF_EXIT_CONNECT_PASSWORD_CERTAINLY_EXPIRED: "Connect: password certainly expired",
+    XF_EXIT_CONNECT_CLIENT_REVOKED: "Connect: client revoked",
+    XF_EXIT_CONNECT_WRONG_PASSWORD: "Connect: wrong password",
+    XF_EXIT_CONNECT_ACCESS_DENIED: "Connect: access denied",
+    XF_EXIT_CONNECT_ACCOUNT_RESTRICTION: "Connect: account restriction",
+    XF_EXIT_CONNECT_ACCOUNT_EXPIRED: "Connect: account expired",
+    XF_EXIT_CONNECT_LOGON_TYPE_NOT_GRANTED: "Connect: logon type not granted",
+    XF_EXIT_CONNECT_NO_OR_MISSING_CREDENTIALS: "Connect: no or missing credentials",
+    XF_EXIT_CONNECT_TARGET_BOOTING: "Connect: target booting",
+}
+
 
 THEMES = OrderedDict({
     "Dark": "icon_dark.png",
@@ -357,11 +478,15 @@ def run_command(cmd: str):
             show_error_msg = False
 
         if show_error_msg:
+            if res.returncode in XF_EXIT_CODES:
+                msg = "exit code %d: %s" % (res.returncode, XR_EXIT_CODES[res.returncode])
+            else:
+                msg = "exit code %d" % res.returncode
             dialog = Gtk.MessageDialog(
                 flags=0,
                 message_type=Gtk.MessageType.ERROR,
                 buttons=Gtk.ButtonsType.OK,
-                text="Failed to run command (exit code %d):\n%s" % (res.returncode, mask_password(cmd)),
+                text="Failed to run command (%s):\n%s" % (msg, mask_password(cmd)),
             )
             dialog.run()
             dialog.destroy()
